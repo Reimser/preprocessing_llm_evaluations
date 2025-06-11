@@ -6,6 +6,15 @@ __pycache__/
 # C extensions
 *.so
 
+# Sensible Daten und Credentials
+data/
+.env
+credentials.env
+*.env
+.env.*
+secrets.json
+config.json
+
 # Distribution / packaging
 .Python
 build/

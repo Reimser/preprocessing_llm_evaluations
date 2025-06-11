@@ -1,53 +1,111 @@
-# Preprocessing-LLM-Evaluation
-## Projektbeschreibung
-Dieses Projekt untersucht den Einfluss verschiedener Preprocessing-Formate auf die Qualität und Strukturvalidität von Textausgaben, die durch Large Language Models (LLMs) generiert werden.
-Im Fokus steht die Entwicklung eines embedding-basierten Gütescores zur objektiven Bewertung der generierten Texte.
+# LLM Preprocessing Vergleichspipeline
 
-Das Projekt ist Vorarbeit für eine spätere End-to-End-Pipeline zur automatisierten Erstellung qualifizierter Arbeitszeugnisse.
-
-## Zielsetzung
-Vergleich von drei Eingabeformaten:
-
-Freitext
-
-Stichpunkte
-
-JSON-strukturierte Eingaben
-
-Generierung strukturierter Texte mit GPT-3.5 oder GPT-4 unter Einsatz von Instructor.
-
-Entwicklung eines Embedding-basierten Similarity Scores auf Basis von Sentence-Transformers.
-
-Empirische Bewertung der Preprocessing-Strategien anhand objektiver Metriken.
-
-## Technologiestack
-Python 3.11+
-
-OpenAI API (openai)
-
-Instructor (instructor)
-
-Pydantic (pydantic)
-
-Sentence-Transformers (sentence-transformers)
-
-scikit-learn (sklearn)
-
-Pandas (pandas)
-
-Matplotlib oder Seaborn (optional für Visualisierung)
+Dieses Projekt implementiert eine Pipeline zur Untersuchung des Einflusses verschiedener Preprocessing-Strategien auf die Qualität von LLM-generierten Zusammenfassungen. Die Evaluation erfolgt durch Vergleich mit Goldstandard-Zusammenfassungen (CNN/DailyMail) mittels Embeddings.
 
 ## Projektstruktur
-```bash
-Kopieren
-Bearbeiten
-preprocessing-llm-evaluation/
-├── data/                 # Synthetische HR-Profile
-├── preprocessing/        # Preprocessing-Funktionen (Textvarianten)
-├── generator/            # GPT-Instructor-Calls
-├── scoring/              # Entwicklung des Embedding-Scores
-├── tests/                # Unit-Tests für Scoring und Preprocessing
-├── README.md
-├── requirements.txt
-└── .gitignore
+
 ```
+llm_preprocessing_project/
+│
+├── data/                       # Download & Speicherung des CNN/DailyMail-Datensatzes
+│   └── raw/                    # Unveränderte Originaldaten
+│   └── processed/              # Preprocessed-Varianten
+│
+├── preprocessing/             # Alle Preprocessing-Methoden als Module
+│   ├── clean.py                # z. B. Sonderzeichen entfernen, normalize text
+│   ├── stopwords.py            # Entfernt Stoppwörter
+│   ├── lemmatize.py            # Lemmatization mit spaCy
+│   ├── truncate.py             # Kürzt Text auf N Tokens
+│   └── sentence_filter.py      # Keyword-, NER-, Hauptsatzfilter
+│
+├── prompts/                   # GPT-Prompt-Vorlagen für Generierung
+│   └── default_prompt.txt
+│
+├── generate/                  # GPT-Zusammenfassungen erzeugen
+│   └── generate_summaries.py
+│
+├── evaluate/                  # Embedding-Vergleich & Metriken
+│   └── compare_embeddings.py
+│
+├── models/                    # SentenceTransformer & GPT-Konfigurationen
+│   └── embedder.py
+│
+├── utils/                     # Hilfsfunktionen
+│   └── loader.py              # Datensatz laden
+│   └── writer.py              # Ergebnisse speichern
+│
+├── results/                   # Ergebnisse + Visualisierungen
+│   └── similarities.csv
+│
+├── notebooks/                 # Explorative Analysen
+│   └── overview.ipynb
+│
+├── main.py                    # Steuerung der Pipeline
+├── requirements.txt
+└── README.md
+```
+
+## Installation
+
+1. Klone das Repository:
+```bash
+git clone [repository-url]
+cd llm_preprocessing_project
+```
+
+2. Erstelle eine virtuelle Umgebung und aktiviere sie:
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+```
+
+3. Installiere die Abhängigkeiten:
+```bash
+pip install -r requirements.txt
+```
+
+4. Lade die spaCy-Modelle:
+```bash
+python -m spacy download en_core_web_sm
+```
+
+5. Erstelle eine `.env` Datei im Hauptverzeichnis mit deinem OpenAI API-Key:
+```
+OPENAI_API_KEY=dein-api-key
+```
+
+## Verwendung
+
+1. Lade den CNN/DailyMail-Datensatz in das `data/raw` Verzeichnis.
+
+2. Führe die Pipeline aus:
+```bash
+python main.py --data_dir data --output_dir results
+```
+
+Die Pipeline wird:
+- Die Texte mit verschiedenen Preprocessing-Strategien verarbeiten
+- GPT-Zusammenfassungen für jede Variante generieren
+- Die Zusammenfassungen mit dem Goldstandard vergleichen
+- Die Ergebnisse im `results` Verzeichnis speichern
+
+## Preprocessing-Strategien
+
+- **Clean**: Entfernt Sonderzeichen und normalisiert den Text
+- **Stopwords**: Entfernt Stoppwörter
+- **Lemmatize**: Führt Lemmatisierung mit spaCy durch
+- **Truncate**: Kürzt den Text auf eine maximale Token-Anzahl
+- **Sentence Filter**: Filtert Sätze basierend auf Keywords, NER oder syntaktischer Komplexität
+
+## Evaluation
+
+Die Evaluation erfolgt durch:
+1. Vergleich der Embeddings zwischen verschiedenen Varianten
+2. Vergleich mit Goldstandard-Zusammenfassungen
+3. Berechnung von Ähnlichkeitsmetriken
+4. Visualisierung der Ergebnisse
+
+## Lizenz
+
+[Lizenzinformationen]
