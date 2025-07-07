@@ -1,45 +1,29 @@
-"""
-Generiert Zusammenfassungen mit GPT für verschiedene Preprocessing-Varianten.
-"""
-
 import os
-from pathlib import Path
-from typing import Dict, List
-import openai
+import pandas as pd
+from preprocessing import apply_preprocessing
+from openai import OpenAI
 from dotenv import load_dotenv
 
-# Lade Umgebungsvariablen
+# Lade API-Key aus .env-Datei
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
-def load_prompt_template() -> str:
-    """Lädt die Prompt-Vorlage."""
-    prompt_path = Path(__file__).parent.parent / "prompts" / "default_prompt.txt"
-    with open(prompt_path, "r", encoding="utf-8") as f:
+def load_prompt(path="prompts/default_prompt.txt") -> str:
+    """Lädt die Prompt-Vorlage aus einer Textdatei."""
+    with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
-def generate_summary(text: str, model: str = "gpt-3.5-turbo") -> str:
-    """Generiert eine Zusammenfassung mit GPT."""
-    prompt_template = load_prompt_template()
-    prompt = prompt_template.format(text=text)
-    
+def generate_summary(text: str, prompt_template: str, model="gpt-4") -> str:
+    """Erstellt eine Zusammenfassung mittels OpenAI GPT-Modell."""
+    full_prompt = prompt_template + "\n" + text
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model=model,
-            messages=[
-                {"role": "system", "content": "Du bist ein hilfreicher Assistent, der Texte zusammenfasst."},
-                {"role": "user", "content": prompt}
-            ]
+            messages=[{"role": "user", "content": full_prompt}],
+            temperature=0.3
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"Fehler bei der Zusammenfassungsgenerierung: {e}")
+        print("API-Fehler:", e)
         return ""
-
-def process_text_variants(text_variants: Dict[str, str]) -> Dict[str, str]:
-    """Verarbeitet verschiedene Textvarianten und generiert Zusammenfassungen."""
-    summaries = {}
-    for variant_name, text in text_variants.items():
-        summary = generate_summary(text)
-        summaries[variant_name] = summary
-    return summaries 

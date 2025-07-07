@@ -26,4 +26,10 @@ def normalize_text(text: str) -> str:
     # Entferne mehrfache Leerzeichen
     text = re.sub(r'\s+', ' ', text)
     
-    return text.strip() 
+    return text.strip()
+
+def clean_text(text: str) -> str:
+    """Führt Standard-Textbereinigung aus: Normalisieren und Sonderzeichen entfernen."""
+    text = normalize_text(text)
+    text = remove_special_chars(text)
+    return text

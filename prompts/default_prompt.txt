@@ -1,10 +1,4 @@
-Bitte fasse den folgenden Text zusammen. Die Zusammenfassung sollte:
-1. Die wichtigsten Informationen und Hauptpunkte enthalten
-2. Klar und prägnant formuliert sein
-3. Die ursprüngliche Bedeutung des Textes beibehalten
-4. Nicht länger als 3-4 Sätze sein
+Summarize the following news article in 3–5 bullet points in English. Be concise and informative.
 
-Text:
-{text}
-
-Zusammenfassung: 
+Article:
+{{text}}
