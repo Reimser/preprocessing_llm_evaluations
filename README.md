@@ -1,111 +1,106 @@
-# LLM Preprocessing Vergleichspipeline
+# Projekt: Analyse des Einflusses von Preprocessing auf die semantische Qualität von GPT-4-Zusammenfassungen
+## Projektbeschreibung
+Dieses Projekt untersucht den Einfluss verschiedener Preprocessing-Strategien auf die semantische Qualität von durch GPT-4 generierten Zusammenfassungen. Bewertet wird die Qualität anhand der Kosinus-Ähnlichkeit von Sentence-BERT-Embeddings im Vergleich zu Referenzzusammenfassungen aus dem CNN/DailyMail-Datensatz.
 
-Dieses Projekt implementiert eine Pipeline zur Untersuchung des Einflusses verschiedener Preprocessing-Strategien auf die Qualität von LLM-generierten Zusammenfassungen. Die Evaluation erfolgt durch Vergleich mit Goldstandard-Zusammenfassungen (CNN/DailyMail) mittels Embeddings.
+Die Arbeit dient als empirische Analyse und stellt alle Ergebnisse reproduzierbar zur Verfügung.
+Die Dozentin kann den gesamten Workflow mit einem Beispiel durchlaufen lassen, da API-Aufrufe kostenpflichtig sind. Die vollständigen Ergebnisse mit 100 Beispielen sind bereits vollständig vorhanden und dokumentiert.
 
 ## Projektstruktur
 
 ```
-llm_preprocessing_project/
+C:.
+│   .env                              # Umgebungsvariablen, z. B. API-Key
+│   .gitignore                        # Git-Konfigurationsdatei (nicht versionierte Dateien)
+│   evaluate_embeddings.py            # Script zur Berechnung der Similarity Scores
+│   main.py                           # Hauptskript zum Generieren der GPT-4 Zusammenfassungen
+│   README.md                         # Projektbeschreibung und Anleitung
+│   requirements.txt                  # Alle Python-Abhängigkeiten
 │
-├── data/                       # Download & Speicherung des CNN/DailyMail-Datensatzes
-│   └── raw/                    # Unveränderte Originaldaten
-│   └── processed/              # Preprocessed-Varianten
+├───data                              # Alle Datensätze
+│   ├───eval
+│   │       eval_subset.csv           # Test-Subset mit 100 Artikeln + Referenzzusammenfassungen
+│   │
+│   ├───processed
+│   │       eval_results_with_all_strategies.csv  # Ergebnisse aller Strategien auf 100 Artikeln
+│   │
+│   └───raw
+│           cnn.csv                   # Originalartikel (optional / Raw-Daten)
 │
-├── preprocessing/             # Alle Preprocessing-Methoden als Module
-│   ├── clean.py                # z. B. Sonderzeichen entfernen, normalize text
-│   ├── stopwords.py            # Entfernt Stoppwörter
-│   ├── lemmatize.py            # Lemmatization mit spaCy
-│   ├── truncate.py             # Kürzt Text auf N Tokens
-│   └── sentence_filter.py      # Keyword-, NER-, Hauptsatzfilter
+├───evaluate
+│       compare_embeddings.py         # Vergleich von Embeddings verschiedener Varianten
 │
-├── prompts/                   # GPT-Prompt-Vorlagen für Generierung
-│   └── default_prompt.txt
+├───generate
+│       generate_summaries.py         # GPT-4 API Anbindung und Prompt-basierte Generierung
 │
-├── generate/                  # GPT-Zusammenfassungen erzeugen
-│   └── generate_summaries.py
+├───models
+│       embedder.py                   # Wrapper für Sentence-BERT zum Berechnen von Embeddings
 │
-├── evaluate/                  # Embedding-Vergleich & Metriken
-│   └── compare_embeddings.py
+├───notebooks
+│       results_visu.ipynb            # Notebook zur Visualisierung der Ergebnisse
 │
-├── models/                    # SentenceTransformer & GPT-Konfigurationen
-│   └── embedder.py
+├───preprocessing                     # Module für Textvorverarbeitung
+│       clean.py                      # Entfernen von Sonderzeichen, Normalisierung
+│       lemmatize.py                  # Lemmatisierung mit spaCy
+│       sentence_filter.py            # Filterung von Hauptsätzen
+│       stopwords.py                  # Entfernen von Stoppwörtern
+│       tfidf.py                      # TF-IDF Analysemodul (optional, nicht zentral)
+│       truncate.py                   # Token-basierte Kürzung auf 512 Tokens
+│       __init__.py                   # Init-Datei für Python-Package-Struktur
 │
-├── utils/                     # Hilfsfunktionen
-│   └── loader.py              # Datensatz laden
-│   └── writer.py              # Ergebnisse speichern
+├───prompts
+│       default_prompt.txt            # Standard-Prompt-Template für GPT-4 API
 │
-├── results/                   # Ergebnisse + Visualisierungen
-│   └── similarities.csv
+├───results
+│       erste_ausgabe.csv             # Erste Testausgabe (optional)
+│       evaluation_results.csv        # Endgültige Ähnlichkeits-Ergebnisse aller Strategien
 │
-├── notebooks/                 # Explorative Analysen
-│   └── overview.ipynb
-│
-├── main.py                    # Steuerung der Pipeline
-├── requirements.txt
-└── README.md
+└───utils
+        create_eval_subset.py         # Script zur Erstellung des Subsets mit 100 Artikeln
+        loader.py                     # Hilfsfunktionen zum Laden von Dateien
+        writer.py                     # Hilfsfunktionen zum Speichern von Dateien
 ```
 
-## Installation
+## Abhängigkeiten
+Alle benötigten Python-Pakete sind in requirements.txt aufgeführt. Installation mit:
 
-1. Klone das Repository:
-```bash
-git clone [repository-url]
-cd llm_preprocessing_project
-```
-
-2. Erstelle eine virtuelle Umgebung und aktiviere sie:
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-```
-
-3. Installiere die Abhängigkeiten:
-```bash
 pip install -r requirements.txt
-```
 
-4. Lade die spaCy-Modelle:
-```bash
+Zusätzlich muss das spaCy-Sprachmodell en_core_web_sm installiert werden:
+
 python -m spacy download en_core_web_sm
-```
 
-5. Erstelle eine `.env` Datei im Hauptverzeichnis mit deinem OpenAI API-Key:
-```
-OPENAI_API_KEY=dein-api-key
-```
+## Ausführungsreihenfolge
+### Vorbereitung
 
-## Verwendung
+Eine .env-Datei mit gültigem OPENAI_API_KEY muss vorhanden sein.
 
-1. Lade den CNN/DailyMail-Datensatz in das `data/raw` Verzeichnis.
+Hinweis: Falls die bereitgestellten API-Credentials abgelaufen sind oder nicht mehr funktionieren, bitte direkt bei mir melden – ich stelle neue gültige Credentials bereit.
 
-2. Führe die Pipeline aus:
-```bash
-python main.py --data_dir data --output_dir results
-```
+### Generierung der Zusammenfassungen
 
-Die Pipeline wird:
-- Die Texte mit verschiedenen Preprocessing-Strategien verarbeiten
-- GPT-Zusammenfassungen für jede Variante generieren
-- Die Zusammenfassungen mit dem Goldstandard vergleichen
-- Die Ergebnisse im `results` Verzeichnis speichern
+Das Projekt ist so vorbereitet, dass main.py standardmäßig nur mit einem einzelnen Beispiel ausgeführt wird.
+Dies dient dem Nachweis der Funktionsweise im Testlauf und vermeidet unnötige Kosten durch GPT-4 API-Anfragen.
 
-## Preprocessing-Strategien
+### Start des Testlaufs:
 
-- **Clean**: Entfernt Sonderzeichen und normalisiert den Text
-- **Stopwords**: Entfernt Stoppwörter
-- **Lemmatize**: Führt Lemmatisierung mit spaCy durch
-- **Truncate**: Kürzt den Text auf eine maximale Token-Anzahl
-- **Sentence Filter**: Filtert Sätze basierend auf Keywords, NER oder syntaktischer Komplexität
+python main.py
 
-## Evaluation
+Die vollständigen Ergebnisse für alle 100 Artikel sind bereits im Projekt enthalten (eval_results_with_all_strategies.csv) und dokumentieren den kompletten Vergleich aller Preprocessing-Strategien.
 
-Die Evaluation erfolgt durch:
-1. Vergleich der Embeddings zwischen verschiedenen Varianten
-2. Vergleich mit Goldstandard-Zusammenfassungen
-3. Berechnung von Ähnlichkeitsmetriken
-4. Visualisierung der Ergebnisse
+### Evaluation der semantischen Qualität
 
-## Lizenz
+python evaluate_embeddings.py
 
-[Lizenzinformationen]
+Die Ergebnisse werden automatisch in results/evaluation_results.csv gespeichert. Diese Datei enthält alle Bewertungen für alle Preprocessing-Strategien und die 100 Beispiele.
+
+### Visualisierung der Ergebnisse
+Optional kann das Notebook notebooks/results_visu.ipynb geöffnet werden, um die Ergebnisse grafisch zu analysieren und darzustellen.
+
+## Hinweise für die Prüferin
+Das Projekt kann vollständig nachvollzogen werden, indem main.py und evaluate_embeddings.py mit einem einzelnen Beispiel ausgeführt werden.
+
+Die vollständigen Ergebnisse (mit 100 Beispielen) liegen bereits in den bereitgestellten Dateien vor (eval_results_with_all_strategies.csv und evaluation_results.csv).
+
+Bitte beachten: API-Zugriffe sind kostenpflichtig. Daher wurde die Pipeline so vorbereitet, dass sie im Testlauf nur mit einem Beispiel arbeitet.
+
+Falls die API-Credentials nicht mehr gültig sind: Bitte bei mir melden. Ich stelle kurzfristig neue Zugangsdaten zur Verfügung.
