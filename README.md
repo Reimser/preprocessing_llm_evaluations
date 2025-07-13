@@ -18,16 +18,13 @@ C:.
 │
 ├───data                              # Alle Datensätze
 │   ├───eval
-│   │       eval_subset.csv           # Test-Subset mit 100 Artikeln + Referenzzusammenfassungen
-│   │
+│   │       eval_subset1.csv           # Test-Subset mit 100 Artikeln + Referenzzusammenfassungen
+│   │       eval_subset.csv            # Test set mit 3 Beispielen fuer den Testdurchlauf!!!!
 │   ├───processed
-│   │       eval_results_with_all_strategies.csv  # Ergebnisse aller Strategien auf 100 Artikeln
+│   │       eval_results_with_all_strategies1.csv  # Ergebnisse aller Strategien auf 100 Artikeln
 │   │
 │   └───raw
 │           cnn.csv                   # Originalartikel (optional / Raw-Daten)
-│
-├───evaluate
-│       compare_embeddings.py         # Vergleich von Embeddings verschiedener Varianten
 │
 ├───generate
 │       generate_summaries.py         # GPT-4 API Anbindung und Prompt-basierte Generierung
@@ -51,13 +48,11 @@ C:.
 │       default_prompt.txt            # Standard-Prompt-Template für GPT-4 API
 │
 ├───results
-│       erste_ausgabe.csv             # Erste Testausgabe (optional)
-│       evaluation_results.csv        # Endgültige Ähnlichkeits-Ergebnisse aller Strategien
+│      
+│       evaluation_results1.csv        # Endgültige Ähnlichkeits-Ergebnisse aller Strategien
 │
 └───utils
         create_eval_subset.py         # Script zur Erstellung des Subsets mit 100 Artikeln
-        loader.py                     # Hilfsfunktionen zum Laden von Dateien
-        writer.py                     # Hilfsfunktionen zum Speichern von Dateien
 ```
 
 ## Abhängigkeiten

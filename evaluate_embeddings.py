@@ -1,12 +1,10 @@
-import pandas as pd
-from models.embedder import TextEmbedder
+import pandas as pd 
+from models.embedder import TextEmbedder  
 
-# 1. CSV-Datei laden
-df = pd.read_csv("data/processed/eval_results_with_all_strategies.csv")
+df = pd.read_csv("data/processed/eval_results_with_all_strategies.csv")  # Ergebnisdaten laden
 
-# 2. Spalten definieren
-article_col = "article"
-summary_cols = [
+article_col = "article"  # Spalte mit Artikeln
+summary_cols = [  # Spalten mit GPT-4 Zusammenfassungen
     "gpt_none",
     "gpt_remove_special_chars+normalize_text",
     "gpt_remove_stopwords",
@@ -15,21 +13,16 @@ summary_cols = [
     "gpt_filter_main_sentences"
 ]
 
-# 3. Embedding-Modell laden
-embedder = TextEmbedder()
+embedder = TextEmbedder()  # Sentence-BERT Modell initialisieren
 
-# 4. Artikel-Embeddings berechnen
-article_embeddings = embedder.encode(df[article_col].tolist())
+article_embeddings = embedder.encode(df[article_col].tolist())  # Embeddings für Artikel berechnen
 
-# 5. Für jede Strategie: Summary-Embeddings & Similarity berechnen
-for col in summary_cols:
-    summary_embeddings = embedder.encode(df[col].tolist())
-    similarities = embedder.compute_similarity(article_embeddings, summary_embeddings)
+for col in summary_cols:  # Für jede Strategie:
+    summary_embeddings = embedder.encode(df[col].tolist())  # Embeddings für Zusammenfassungen
+    similarities = embedder.compute_similarity(article_embeddings, summary_embeddings)  # Similarity-Matrix
 
-    # Cosine Similarity-Diagonale (1:1-Vergleich) extrahieren
-    scores = [round(float(sim.item()), 4) for sim in similarities.diagonal()]
-    df[f"{col}_similarity"] = scores
+    scores = [round(float(sim.item()), 4) for sim in similarities.diagonal()]  # 1:1 Vergleich Scores extrahieren
+    df[f"{col}_similarity"] = scores  # Scores als neue Spalte hinzufügen
 
-# 6. Ergebnis speichern
-df.to_csv("results/evaluation_results.csv", index=False)
-print("✅ Evaluation abgeschlossen – Ergebnisse in: output/evaluation_results.csv")
+df.to_csv("results/evaluation_results.csv", index=False)  # Ergebnisse speichern
+print("Evaluation abgeschlossen – Ergebnisse in: output/evaluation_results.csv")  # Abschlussmeldung
